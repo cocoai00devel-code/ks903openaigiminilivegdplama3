@@ -1,0 +1,103 @@
+services:
+  # --- 🚀 最新鍵付き玄関（Go）Goセキュア・ゲートウェイ (Go) 【新設！】 第2層：Go ゲートウェイ (唯一の窓口) ---
+  gateway:
+    build: ./gateway
+    container_name: fortress-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - policy-engine
+      - rust-backend
+    networks:
+      - fortress-net
+
+  # --- ⚖️ 審判所（Haskell） 第3層：Haskell 審判所 (論理チェック) ---
+  policy-engine:
+    build: ./policy-server
+    container_name: fortress-policy
+    expose:
+      - "8000"
+    networks:
+      - fortress-net
+
+  # --- 🛡️ バックエンド要塞 (Rust) 第4層：Rust 金庫 (API実行) ---
+  rust-backend:
+    build: ./backend
+    container_name: fortress-backend
+    expose:
+      - "5000"
+    env_file:
+      - .env  # 👈 ここに GEMINI_API_KEY を書いたファイルを置く
+    networks:
+      - fortress-net
+
+networks:
+  fortress-net:
+    driver: bridge
+
+
+
+
+# services:
+#   # 🛡️ バックエンド要塞 (Rust)
+#   # backend:
+#   #   build: ./backend
+#   #   ports:
+#   #     - "3000:3000"
+#   #   env_file:
+#   #     - ./backend/.env
+
+#    # 🛡️ バックエンド要塞 (Rust)
+#   backend:
+#     build: ./backend
+#     # ports（外部公開）を削除し、expose（内部公開）に変更
+#     expose:
+#       - "8080"
+#     env_file:
+#       - ./backend/.env
+
+#   # 🎨 フロントエンド外装 (React + TS)
+#   # frontend:
+#   #   build: ./frontend
+#   #   ports:
+#   #     - "5173:5173"
+#   #   depends_on:
+#   #     - backend
+
+
+
+#   frontend:
+#     build: ./frontend
+#     ports:
+#       - "5173:5173"
+#     depends_on:
+#       - gateway # 👈 Goが動いてから起動するように変更
+
+#   # 🚀 Goセキュア・ゲートウェイ (Go) 【新設！】
+#   gateway:
+#     build: ./gateway
+#     ports:
+#       - "3000:3000" # 👈 外部からのアクセス（玄関口）をGoが担当
+#     environment:
+#       - BACKEND_URL=ws://backend:8080/ws
+#     depends_on:
+#       - backend
+  
+#    services:
+#   # 審判所（Haskell）
+#   policy-engine:
+#     build: ./policy-server
+#     # 外部には公開せず、内部ネットワークでのみ待機
+#     expose:
+#       - "8000"
+
+#   # 玄関（Go）
+#   gateway:
+#     build: ./gateway
+#     ports:
+#       - "3000:3000" # ここだけが外の世界と繋がる
+#     depends_on:
+#       - policy-engine
+#       - backend
+
+ 
